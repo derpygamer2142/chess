@@ -13,9 +13,9 @@ export default class Piece {
             return []
         }
 
-        this.isValid = (x, y) => { // check if king is in check
-            const valid = this.validMoves(x, y)
-            console.log(valid, x, y)
+        this.isValid = (x, y, safe) => { // check if king is in check
+            const valid = this.validMoves(safe)
+            // console.log(valid, x, y)
             return valid.some((v, i) => v[0] == x && v[1] == y)
         }
     }

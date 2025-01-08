@@ -4,7 +4,7 @@ export default class Rook extends Piece {
     constructor(team, board, x, y) {
         super("r",team, board, x, y)
         this.moved = false
-        // todo: castling
+        
         this.validMoves = () => {
             const m = []
             for (let d = 0; d < Math.PI*2; d+=Math.PI/2) {

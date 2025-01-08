@@ -5,8 +5,7 @@ export default class King extends Piece {
         super("k",team, board, x, y)
         this.castling = []
         this.moved = false
-        this.validMoves = () => {
-            this.castling = []
+        this.validMoves = (safe) => {
             const m = []
             for (let d = 0; d < Math.PI*2; d+=Math.PI/4) {
                 const xc = Math.round(Math.cos(d))
@@ -29,19 +28,22 @@ export default class King extends Piece {
             if (this.moved) return m
             const rooks = board.flat(3).filter((v) => (v.team === this.team) && (v.name === "r") && !v.moved)
             rooks.forEach((r) => {
-                console.log("rook")
+                
                 if (r.y === 0) {
                     if (board[r.x][2] === "" && board[r.x][3] === "") {
                         m.push([r.x, 2])
-                        this.castling.push([r.x, 2, r.x, r.y, r.x, 3])
+                        if (safe) this.castling.push([r.x, 2, r.x, r.y, r.x, 3])
+                        // console.log("a")
                     }
                 }
                 else {
                     if (board[r.x][6] === "" && board[r.x][5] === "") {
                         m.push([r.x, 6])
-                        this.castling.push([r.x, 6, r.x, r.y, r.x, 5])
+                        if (safe) this.castling.push([r.x, 6, r.x, r.y, r.x, 5])
+                        // console.log("b")
                     }
                 }
+                // console.log(this.castling)
             })
 
             return m

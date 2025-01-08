@@ -4,7 +4,6 @@ import Knight from "./Knight.js"
 import Bishop from "./Bishop.js"
 import Queen from "./Queen.js"
 import King from "./King.js"
-// todo: castling
 
 const canv = document.getElementById("canv")
 const ctx = canv.getContext("2d")
@@ -15,6 +14,7 @@ canv.height = window.innerHeight
 const board = []
 let displayText = ""
 let swapPiece = null
+let turn = true // white = true
 
 for (let rank = 0; rank < 8; rank++) { // y
     let column = []
@@ -106,7 +106,7 @@ function lookForCheck(team) {
             if (f !== "") {
                 // console.log(f)
                 // console.log(piece(f.name).prototype)
-                const moves = f.validMoves()//piece(f.name).prototype.validMoves.call(f)// f.validList
+                const moves = f.validMoves(false)//piece(f.name).prototype.validMoves.call(f)// f.validList
                 for (let mi = 0; mi < moves.length; mi++) {
                     const [x, y] = moves[mi]
                     if (Math.min(Math.max(0, x), 7) == x && Math.min(Math.max(0, y), 7) == y) {
@@ -207,12 +207,13 @@ function update() {
     const myBoard = 7 - Math.floor(my/100)
     if (md && !lastmd && !movingPiece && mx <= 800 && my <= 800) {
         movingPiece = board[myBoard][mxBoard]
+        if (movingPiece === "" || movingPiece?.team !== turn) movingPiece = null
         //console.log(board, myBoard,mxBoard, movingPiece)
     }
     if (!md && movingPiece && mx <= 800 && my <= 800) {
         //console.log("release", myBoard,mxBoard)
         
-        if (movingPiece.isValid(myBoard,mxBoard)) {
+        if (movingPiece.isValid(myBoard,mxBoard, true)) {
             const m = movingPiece.move(myBoard,mxBoard, board)
             if (lookForCheck(movingPiece.team)) {
                 console.warn("check")
@@ -235,23 +236,76 @@ function update() {
                     swapPiece = movingPiece
                 }
                 
-                console.log(movingPiece?.castling)
+                console.log(movingPiece.castling)
                 if (movingPiece.name === "k" && movingPiece?.castling?.length > 0) {
                     
                     movingPiece.castling.forEach((c) => {
                         if (movingPiece.x === c[0] && movingPiece.y === c[1]) {
-                            [c[4]][c[5]] = board[c[2]][c[3]]
-                            board[c[2]][c[3]] = ""
+                            board[c[2]][c[3]].move(c[4], c[5])
                         }   
                     })
                     
                 }
+
+
+                turn = !turn
             }
             
             
             //console.log("move")
         }
+
+
+        if (movingPiece?.castling) movingPiece.castling = []
         movingPiece = null
+        
+
+        if (lookForCheck(turn)) {
+            const pieces = board.flat(3).filter((v) => v?.team === turn)
+            let checkmate = true
+
+            for (let j = 0; j < pieces.length; j++) {
+                const p = pieces[j]
+
+                const moves = p.validMoves(false)
+                
+                for (let i = 0; i < moves.length; i++) {
+                    const m = moves[i]
+                    console.log(p)
+                    console.log(m)
+                    const old = board[m[1]][m[0]]
+                    const op = {}
+                    op.x = p.x
+                    op.y = p.y
+                    board[p.x][p.y] = ""
+                    board[m[1]][m[0]] = p
+                    p.x = m[1]
+                    p.y = m[0]
+    
+                    const c = lookForCheck(turn)
+                    
+                    board[m[1]][m[0]] = old
+                    board[op.x][op.y] = p
+                    p.x = op.x
+                    p.y = op.y
+                    op.x = m[1]
+                    op.y = m[0]
+    
+                    if (!c) {
+                        checkmate = false
+                        break
+                    }
+                    
+                }
+    
+                if (!checkmate) break
+            }
+
+            if (checkmate) {
+                displayText = "checkmate"
+            }
+
+        }
     }
 
     //console.log(movingPiece)
