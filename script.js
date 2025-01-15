@@ -273,25 +273,26 @@ function update() {
                     const m = moves[i]
                     console.log(p)
                     console.log(m)
-                    const old = board[m[1]][m[0]]
+                    const old = board[m[0]][m[1]]
                     const op = {}
                     op.x = p.x
                     op.y = p.y
                     board[p.x][p.y] = ""
-                    board[m[1]][m[0]] = p
-                    p.x = m[1]
-                    p.y = m[0]
+                    board[m[0]][m[1]] = p
+                    p.x = m[0]
+                    p.y = m[1]
     
                     const c = lookForCheck(turn)
                     
-                    board[m[1]][m[0]] = old
+                    board[m[0]][m[1]] = old
                     board[op.x][op.y] = p
                     p.x = op.x
                     p.y = op.y
-                    op.x = m[1]
-                    op.y = m[0]
+                    op.x = m[0]
+                    op.y = m[1]
     
                     if (!c) {
+                        console.log(p, m)
                         checkmate = false
                         break
                     }
@@ -300,9 +301,9 @@ function update() {
     
                 if (!checkmate) break
             }
-
+            console.log(checkmate)
             if (checkmate) {
-                displayText = "checkmate"
+                displayText = !turn ? "white" : "black" + " wins"
             }
 
         }
